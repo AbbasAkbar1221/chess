@@ -70,6 +70,36 @@ const ChessGame = () => {
     return (row + col) % 2 === 0 ? "bg-gray-200" : "bg-gray-800";
   };
 
+  const isKingDefeated = () =>{
+    let whiteKingFound = false;
+    let blackKingFound = false;
+
+    for(let row of chessBoard){
+      for(let piece of row){
+        if(piece){
+          if(piece.type === 'king'){
+            if(piece.color === 'white'){
+              whiteKingFound = true;
+            }
+            else if(piece.color === 'black'){
+              blackKingFound = true;
+            }
+          }
+        }
+      }
+    }
+
+     return !whiteKingFound || !blackKingFound
+  }
+  
+  if(isKingDefeated()){
+    alert(`${turn === 'white' ? 'Black' : 'White'} wins! Game Over.`)
+    setChessBoard(initialChessBoard)
+    setTurn('white')
+    setSelectedPiece(null)
+    setPossibleMoves([])
+  }
+
   const handleSquareClick = (row, col) => {
     const piece = chessBoard[row][col];
 
@@ -77,6 +107,7 @@ const ChessGame = () => {
       const [selectedRow, selectedCol] = selectedPiece;
 
       if (isValidMove(selectedRow, selectedCol, row, col)) {
+
         const newChessBoard = chessBoard.map((r, rowIdx) =>
           r.map((c, colIdx) => {
             if (rowIdx === row && colIdx === col) {
@@ -93,6 +124,7 @@ const ChessGame = () => {
         setTurn(turn === "white" ? "black" : "white");
         setSelectedPiece(null);
         setPossibleMoves([])
+
       } else {
         alert("Invalid move!");
         setSelectedPiece(null);
