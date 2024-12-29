@@ -355,13 +355,13 @@ const ChessGame = () => {
 
   
 return (
-  <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
+  <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 relative">
     <div
-      className="absolute inset-0 bg-cover bg-center"
+      className="absolute inset-0 bg-cover bg-center z-0"
       style={{ backgroundImage:'url(/chess.jpg)' }}
       
     ></div>
-    <div className="grid grid-cols-8 grid-rows-8 w-[480px] h-[480px] border-4 border-gray-800">
+    <div className="grid grid-cols-8 grid-rows-8 w-[480px] h-[480px] border-4 border-gray-800 z-10">
       {chessBoard.map((row, rowIndex) =>
         row.map((piece, colIndex) => {
           const isHighlighted = possibleMoves.some(
@@ -393,13 +393,28 @@ return (
         })
       )}
     </div>
+    <div className="flex">
     <div
       className={`mt-4 text-lg font-semibold px-4 py-2 rounded z-20 ${
         turn === "white" ? "bg-gray-200 text-black" : "bg-black text-white"
       }`}
     >
       {`Turn: ${turn.charAt(0).toUpperCase() + turn.slice(1)}`}
+      
     </div>
+    <div className="relative z-20 mt-4 ml-4">
+    <button
+  onClick={() => {
+    setChessBoard(initialChessBoard)
+    setTurn('white')
+  }}
+  className="z-30 text-white bg-black hover:bg-gray-800 px-4 py-2 rounded"
+>
+  Reset
+</button>
+
+  </div>
+  </div>
   </div>
 );
 };
