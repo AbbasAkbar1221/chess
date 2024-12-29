@@ -64,10 +64,41 @@ const ChessGame = () => {
   let [chessBoard, setChessBoard] = useState(initialChessBoard);
   let [turn, setTurn] = useState("white");
   let [selectedPiece, setSelectedPiece] = useState(null);
+  let [possibleMoves, setPossibleMoves] = useState([])
 
   const getSquareColor = (row, col) => {
-    return (row + col) % 2 === 0 ? "bg-grey-200" : "bg-gray-800";
+    return (row + col) % 2 === 0 ? "bg-gray-200" : "bg-gray-800";
   };
+
+  const isKingDefeated = () =>{
+    let whiteKingFound = false;
+    let blackKingFound = false;
+
+    for(let row of chessBoard){
+      for(let piece of row){
+        if(piece){
+          if(piece.type === 'king'){
+            if(piece.color === 'white'){
+              whiteKingFound = true;
+            }
+            else if(piece.color === 'black'){
+              blackKingFound = true;
+            }
+          }
+        }
+      }
+    }
+
+     return !whiteKingFound || !blackKingFound
+  }
+  
+  if(isKingDefeated()){
+    alert(`${turn === 'white' ? 'Black' : 'White'} wins! Game Over.`)
+    setChessBoard(initialChessBoard)
+    setTurn('white')
+    setSelectedPiece(null)
+    setPossibleMoves([])
+  }
 
   const handleSquareClick = (row, col) => {
     const piece = chessBoard[row][col];
@@ -76,6 +107,7 @@ const ChessGame = () => {
       const [selectedRow, selectedCol] = selectedPiece;
 
       if (isValidMove(selectedRow, selectedCol, row, col)) {
+
         const newChessBoard = chessBoard.map((r, rowIdx) =>
           r.map((c, colIdx) => {
             if (rowIdx === row && colIdx === col) {
@@ -91,13 +123,28 @@ const ChessGame = () => {
         setChessBoard(newChessBoard);
         setTurn(turn === "white" ? "black" : "white");
         setSelectedPiece(null);
+        setPossibleMoves([])
+
       } else {
         alert("Invalid move!");
         setSelectedPiece(null);
+        setPossibleMoves([])
       }
     } else {
       if (piece && piece.color === turn) {
         setSelectedPiece([row, col]);
+
+        let moves = [];
+
+        for(let i=0 ;i<8; i++){
+          for(let j=0; j<8; j++){
+            if(isValidMove(row, col, i, j)){
+              moves.push([i, j]);
+            }
+          }
+        }
+
+        setPossibleMoves(moves)
       } else {
         alert("Not your turn or invalid selection!");
       }
@@ -271,7 +318,7 @@ const ChessGame = () => {
     let currRow = fromRow + rowStep;
     let currCol = fromCol + colStep;
 
-    while (currRow !== toRow && currCol !== toCol) {
+    while (currRow !== toRow || currCol !== toCol) {
       if (chessBoard[currRow][currCol]) {
         return false;
       }
@@ -287,6 +334,8 @@ const ChessGame = () => {
 
     return true;
   };
+
+  
   const isValidKingMove = (fromRow, fromCol, toRow, toCol, isWhite) => {
     const rowDiff = Math.abs(fromRow - toRow);
     const colDiff = Math.abs(fromCol - toCol);
@@ -304,39 +353,55 @@ const ChessGame = () => {
     return true;
   };
 
-  return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
-      <div className="grid grid-cols-8 grid-rows-8 w-[480px] h-[480px] border-4 border-gray-800">
-        {chessBoard.map((row, rowIndex) =>
-          row.map((piece, colIndex) => (
+  
+return (
+  <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
+    <div
+      className="absolute inset-0 bg-cover bg-center"
+      style={{ backgroundImage:'url(/chess.jpg)' }}
+      
+    ></div>
+    <div className="grid grid-cols-8 grid-rows-8 w-[480px] h-[480px] border-4 border-gray-800">
+      {chessBoard.map((row, rowIndex) =>
+        row.map((piece, colIndex) => {
+          const isHighlighted = possibleMoves.some(
+            ([r, c]) => r === rowIndex && c === colIndex
+          );
+          return (
             <div
               key={`${rowIndex}-${colIndex}`}
-              className={`w-full h-full ${getSquareColor(
+              className={`w-full h-full relative ${getSquareColor(
                 rowIndex,
                 colIndex
-              )} border border-gray-800`}
+              )} border border-gray-800 `}
               onClick={() => handleSquareClick(rowIndex, colIndex)}
             >
+              {isHighlighted && (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="bg-green-900 rounded-full w-4 h-4"></div>
+              </div>
+            )}
               {piece && (
                 <img
-                  src={piece ? pieceImages[piece.color][piece.type] : null}
+                  src={pieceImages[piece.color][piece.type]}
                   alt="chess piece"
                   className="w-full h-full object-contain"
                 />
               )}
             </div>
-          ))
-        )}
-      </div>
-      <div
-        className={`mt-4 text-lg font-semibold px-4 py-2 rounded ${
-          turn === "white" ? "bg-gray-200 text-black" : "bg-black text-white"
-        }`}
-      >
-        {`Turn: ${turn.charAt(0).toUpperCase() + turn.slice(1)}`}
-      </div>
+          );
+        })
+      )}
     </div>
-  );
+    <div
+      className={`mt-4 text-lg font-semibold px-4 py-2 rounded z-20 ${
+        turn === "white" ? "bg-gray-200 text-black" : "bg-black text-white"
+      }`}
+    >
+      {`Turn: ${turn.charAt(0).toUpperCase() + turn.slice(1)}`}
+    </div>
+  </div>
+);
 };
 
 export default ChessGame;
